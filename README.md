@@ -1,8 +1,10 @@
-# API REST para Administración de Clientes
+# Programacion2ClientesAPI
 
-Proyecto desarrollado para el curso de Programación II.
+API REST desarrollada en **.NET 10** para la administración de clientes, utilizando **ASP.NET Core**, **Entity Framework Core** y **MySQL**.
 
-La aplicación consiste en una API REST desarrollada con ASP.NET Core .NET 10 para realizar operaciones CRUD sobre clientes utilizando MySQL y Entity Framework Core.
+El proyecto permite realizar operaciones CRUD completas sobre la información de clientes y cuenta con documentación interactiva mediante **Swagger**.
+
+---
 
 ## Tecnologías utilizadas
 
@@ -11,52 +13,68 @@ La aplicación consiste en una API REST desarrollada con ASP.NET Core .NET 10 pa
 - Entity Framework Core
 - Pomelo.EntityFrameworkCore.MySql
 - MySQL
+- Swagger / Swashbuckle
 - Visual Studio Code
 - Postman
+- Git
+- GitHub
 
-## Base de datos
+---
 
-Nombre de la base de datos:
+## Objetivo del proyecto
 
-db_programacion2_clientes
+Desarrollar una API REST para administrar clientes mediante operaciones CRUD.
 
-Tabla principal:
+La API permite:
 
-clientes
+- Consultar todos los clientes.
+- Consultar un cliente específico por ID.
+- Registrar nuevos clientes.
+- Actualizar clientes existentes.
+- Eliminar clientes.
+
+---
 
 ## Modelo Cliente
 
-El modelo contiene los siguientes campos:
+El modelo `Cliente` contiene los siguientes campos:
 
-- Id_cliente
-- CUI
-- NIT
-- Nombres
-- Apellidos
-- Direccion
-- Telefono
-- Fecha_Nacimiento
+| Campo            | Tipo     | Descripción                         |
+| ---------------- | -------- | ----------------------------------- |
+| Id_cliente       | int      | Identificador único del cliente     |
+| CUI              | string   | Código Único de Identificación      |
+| NIT              | string   | Número de Identificación Tributaria |
+| Nombres          | string   | Nombres del cliente                 |
+| Apellidos        | string   | Apellidos del cliente               |
+| Direccion        | string   | Dirección del cliente               |
+| Telefono         | string   | Número de teléfono                  |
+| Fecha_Nacimiento | DateTime | Fecha de nacimiento                 |
 
-## Operaciones CRUD
+---
 
-La API permite realizar las siguientes operaciones:
+## Estructura del proyecto
 
-| Método HTTP | Endpoint           | Descripción                |
-| ----------- | ------------------ | -------------------------- |
-| GET         | /api/clientes      | Obtener todos los clientes |
-| GET         | /api/clientes/{id} | Obtener un cliente por ID  |
-| POST        | /api/clientes      | Registrar un nuevo cliente |
-| PUT         | /api/clientes/{id} | Actualizar un cliente      |
-| DELETE      | /api/clientes/{id} | Eliminar un cliente        |
-
-## Configuración
-
-Modificar la cadena de conexión según la instalación local de MySQL:
-
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "server=localhost;port=3306;database=db_programacion2_clientes;user=root;password=TU_PASSWORD;"
-  }
-}
+```text
+Programacion2ClientesAPI/
+│
+├── Controllers/
+│   └── ClientesController.cs
+│
+├── Data/
+│   └── AppDbContext.cs
+│
+├── Models/
+│   └── Cliente.cs
+│
+├── Migrations/
+│
+├── Properties/
+│   └── launchSettings.json
+│
+├── Program.cs
+├── appsettings.json
+├── Programacion2ClientesAPI.csproj
+├── Programacion2ClientesAPI.http
+├── README.md
+└── .gitignore
 ```
