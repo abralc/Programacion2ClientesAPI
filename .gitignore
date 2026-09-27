@@ -1,0 +1,29 @@
+# Compilación .NET
+bin/
+obj/
+
+# Visual Studio
+.vs/
+
+# Visual Studio Code
+.vscode/
+
+# Rider / JetBrains
+.idea/
+
+# Archivos locales
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Configuración con credenciales locales
+appsettings.Development.json
+
+# Logs
+*.log
+logs/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db

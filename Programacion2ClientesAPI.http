@@ -1,0 +1,41 @@
+@host = http://localhost:5169
+
+### GET - Todos los clientes
+GET {{host}}/api/clientes
+Accept: application/json
+
+### GET - Cliente por ID
+GET {{host}}/api/clientes/1
+Accept: application/json
+
+### POST - Crear cliente
+POST {{host}}/api/clientes
+Content-Type: application/json
+
+{
+  "cui": "1234567890101",
+  "nit": "1234567-8",
+  "nombres": "Juan Carlos",
+  "apellidos": "Perez Lopez",
+  "direccion": "Ciudad de Guatemala",
+  "telefono": "55551234",
+  "fecha_Nacimiento": "2000-05-15"
+}
+
+### PUT - Actualizar cliente
+PUT {{host}}/api/clientes/1
+Content-Type: application/json
+
+{
+  "id_cliente": 1,
+  "cui": "1234567890101",
+  "nit": "1234567-8",
+  "nombres": "Juan Carlos",
+  "apellidos": "Perez Lopez",
+  "direccion": "Villa Nueva, Guatemala",
+  "telefono": "55559876",
+  "fecha_Nacimiento": "2000-05-15"
+}
+
+### DELETE - Eliminar cliente
+DELETE {{host}}/api/clientes/1
