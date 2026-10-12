@@ -1,124 +1,122 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Programacion2ClientesAPI.Data;
-using Programacion2ClientesAPI.Models;
+using Programacion2ClientesAPI.DTOs;
+using Programacion2ClientesAPI.Services;
 
-namespace Programacion2ClientesAPI.Controllers
+namespace Programacion2ClientesAPI.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class ClientesController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class ClientesController : ControllerBase
+    private readonly IClienteService _clienteService;
+
+    public ClientesController(IClienteService clienteService)
     {
-        private readonly AppDbContext _context;
+        _clienteService = clienteService;
+    }
 
-        public ClientesController(AppDbContext context)
+    [HttpGet]
+    [ProducesResponseType(
+        typeof(IEnumerable<ClienteDto>),
+        StatusCodes.Status200OK)]
+    public async Task<ActionResult<IEnumerable<ClienteDto>>> GetClientes()
+    {
+        var clientes = await _clienteService.ObtenerTodosAsync();
+        return Ok(clientes);
+    }
+
+    [HttpGet("{id:int}")]
+    [ProducesResponseType(typeof(ClienteDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ClienteDto>> GetCliente(int id)
+    {
+        var cliente = await _clienteService.ObtenerPorIdAsync(id);
+
+        if (cliente is null)
         {
-            _context = context;
+            return NotFound(new { mensaje = "Cliente no encontrado." });
         }
 
-        // GET: api/clientes
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Cliente>>> GetClientes()
-        {
-            return await _context.Clientes.ToListAsync();
-        }
+        return Ok(cliente);
+    }
 
-        // GET: api/clientes/1
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Cliente>> GetCliente(int id)
-        {
-            var cliente = await _context.Clientes.FindAsync(id);
+    [HttpPost]
+    [ProducesResponseType(typeof(ClienteDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<ClienteDto>> PostCliente(CrearClienteDto dto)
+    {
+        var resultado = await _clienteService.CrearAsync(dto);
 
-            if (cliente == null)
+        if (!resultado.Exito)
+        {
+            if (EsConflicto(resultado.Error))
             {
-                return NotFound(new
-                {
-                    mensaje = "Cliente no encontrado"
-                });
+                return Conflict(new { mensaje = resultado.Error });
             }
 
-            return cliente;
+            return BadRequest(new { mensaje = resultado.Error });
         }
 
-        // POST: api/clientes
-        [HttpPost]
-        public async Task<ActionResult<Cliente>> PostCliente(Cliente cliente)
+        return CreatedAtAction(
+            nameof(GetCliente),
+            new { id = resultado.Cliente!.Id_cliente },
+            resultado.Cliente
+        );
+    }
+
+    [HttpPut("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> PutCliente(
+        int id,
+        ActualizarClienteDto dto)
+    {
+        var resultado = await _clienteService.ActualizarAsync(id, dto);
+
+        if (!resultado.Exito)
         {
-            _context.Clientes.Add(cliente);
-
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(
-                nameof(GetCliente),
-                new { id = cliente.Id_cliente },
-                cliente
-            );
-        }
-
-        // PUT: api/clientes/1
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutCliente(
-            int id,
-            Cliente cliente
-        )
-        {
-            if (id != cliente.Id_cliente)
+            if (resultado.Error == "Cliente no encontrado.")
             {
-                return BadRequest(new
-                {
-                    mensaje = "El ID no coincide con el cliente"
-                });
+                return NotFound(new { mensaje = resultado.Error });
             }
 
-            _context.Entry(cliente).State =
-                EntityState.Modified;
-
-            try
+            if (EsConflicto(resultado.Error))
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ClienteExists(id))
-                {
-                    return NotFound(new
-                    {
-                        mensaje = "Cliente no encontrado"
-                    });
-                }
-
-                throw;
+                return Conflict(new { mensaje = resultado.Error });
             }
 
-            return NoContent();
+            return BadRequest(new { mensaje = resultado.Error });
         }
 
-        // DELETE: api/clientes/1
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCliente(int id)
+        return NoContent();
+    }
+
+    [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteCliente(int id)
+    {
+        var eliminado = await _clienteService.EliminarAsync(id);
+
+        if (!eliminado)
         {
-            var cliente = await _context.Clientes.FindAsync(id);
-
-            if (cliente == null)
-            {
-                return NotFound(new
-                {
-                    mensaje = "Cliente no encontrado"
-                });
-            }
-
-            _context.Clientes.Remove(cliente);
-
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return NotFound(new { mensaje = "Cliente no encontrado." });
         }
 
-        private bool ClienteExists(int id)
+        return NoContent();
+    }
+
+    private static bool EsConflicto(string? error)
+    {
+        if (string.IsNullOrWhiteSpace(error))
         {
-            return _context.Clientes.Any(
-                e => e.Id_cliente == id
-            );
+            return false;
         }
+
+        return error.Contains("CUI", StringComparison.OrdinalIgnoreCase)
+            || error.Contains("NIT", StringComparison.OrdinalIgnoreCase);
     }
 }
